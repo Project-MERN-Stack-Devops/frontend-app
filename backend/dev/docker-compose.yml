@@ -1,6 +1,7 @@
 
 services:
   backend-api:
+    image: adeem07/api-session14
     build: . # Build the image from the current directory (Dockerfile)
     container_name: api-container # Name of the container
     ports:
