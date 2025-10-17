@@ -1,7 +1,7 @@
 #frontend/dev/docker-compose.yml
 services:
   frontend:
-    image: adeem07/api-session14
+    image: adeem07/app-session14
     container_name: frontend-container
     restart: always
     ports:
