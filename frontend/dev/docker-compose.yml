@@ -1,0 +1,13 @@
+#frontend/dev/docker-compose.yml
+services:
+  frontend:
+    image: adeem07/api-session14
+    container_name: frontend-container
+    restart: always
+
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    ports:
+      - "4002:80"
+    
