@@ -28,9 +28,9 @@ services:
       - 8081:8081
     environment:
       ME_CONFIG_MONGODB_URL: mongodb://mongodb:mongo123@mongo:27017/ # Correct variable name
-      ME_CONFIG_BASICAUTH_ENABLED: true
-      ME_CONFIG_BASICAUTH_USERNAME: ademm
-      ME_CONFIG_BASICAUTH_PASSWORD: ademm123
+      ME_CONFIG_BASICAUTH_ENABLED: true #enable basic authentication for mongo-express
+      ME_CONFIG_BASICAUTH_USERNAME: ademm #username for mongo-express
+      ME_CONFIG_BASICAUTH_PASSWORD: ademm123 #password for mongo-express
     depends_on:
       - mongo
 
