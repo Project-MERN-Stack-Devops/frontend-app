@@ -1,0 +1,17 @@
+name: Deploy Frontend 
+
+on:          # Trigger the workflow on push to the main branch ( declancheur de workflow)
+    push:
+        branches:
+            [main,master,dev]
+          
+jobs:
+    Test_Unitaire:
+        runs-on: ubuntu-latest
+        steps:
+            - name: clone code 
+              uses: actions/checkout@v5
+            - name: install dependencies
+              run: npm i
+            - name: run commande jest
+              run: npm run test 
