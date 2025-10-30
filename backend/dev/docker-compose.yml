@@ -1,0 +1,53 @@
+
+services:
+  backend-api:
+    image: adeem07/api-session14
+    build: . # Build the image from the current directory (Dockerfile)
+    container_name: api-container # Name of the container
+    ports:
+      - "3000:3001"
+    env_file:
+      - .env # Assurez-vous que ce fichier contient MONGO_URI
+    depends_on:
+      - mongo
+
+
+  mongo:
+    image: mongo
+    restart: always
+    container_name: mongo-container
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongodb
+      MONGO_INITDB_ROOT_PASSWORD: mongo123
+
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongodb:mongo123@mongo:27017/ # Correct variable name
+      ME_CONFIG_BASICAUTH_ENABLED: true #enable basic authentication for mongo-express
+      ME_CONFIG_BASICAUTH_USERNAME: ademm #username for mongo-express
+      ME_CONFIG_BASICAUTH_PASSWORD: ademm123 #password for mongo-express
+    depends_on:
+      - mongo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
