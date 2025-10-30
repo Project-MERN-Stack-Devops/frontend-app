@@ -33,7 +33,7 @@ jobs:
                username: ${{ vars.DOCKERHUB_USERNAME }}
                password: ${{ secrets.DOCKERHUB_TOKEN_FRONTEND }}
             - name : list image 
-              run : docker image 
+              run : docker images 
 
             - name : docker push 
               run : docker push adeem07/app-session14:${{ github.run_number }}   
