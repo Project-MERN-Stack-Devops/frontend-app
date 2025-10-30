@@ -2,7 +2,7 @@ name: frontend-app-stack
 
 # Define services
 services:
-  frontend-app:
+  frontend-app:  #service name 
     image: adeem07/app-session14
     build:
       context: .  # Build context is the current directory.

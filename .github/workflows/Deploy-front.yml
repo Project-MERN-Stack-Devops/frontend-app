@@ -37,5 +37,21 @@ jobs:
 
             - name : docker push 
               run : docker push adeem07/app-session14:${{ github.run_number }}   
+    Deployment:
+      runs-on: ubuntu-lastest 
+      needs: [Test_Unitaire,Build_and_push]
+      steps:
+        - name: SSH Connect And Deploy
+          uses: appleboy/ssh-action@v1
+          with:
+            host: ${{ secrets.VPS_HOST }}
+            username: ${{ secrets.VPS_USERNAME }}
+            password: ${{ secrets.VPS_PASSWORD }}
+            script: |
+              cd /home/user/devops-script/frontend/dev
+              sudo docker compose pull frontend-app
+              sudo docker down frontend-app
+              sudo docker compose up -d        
 
-               
+
+
