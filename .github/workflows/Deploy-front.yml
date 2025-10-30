@@ -20,7 +20,7 @@ jobs:
               run: npm i
             - name: run commande jest
               run: npm run test 
-
+          
 
     Build_and_push:
         runs-on: ubuntu-latest
@@ -59,4 +59,4 @@ jobs:
               sudo docker compose up -d        
 
 
-
+   
