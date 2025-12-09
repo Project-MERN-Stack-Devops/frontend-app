@@ -22,6 +22,75 @@ jobs:
               run: npm run test 
           
 
+    sonarqube-code-quality-scan-job:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Source Code
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0  # Récupère tout l'historique pour une analyse complète
+                ref: ${{ github.ref }}
+
+               # Étape 2: Configuration du cache pour npm
+            - name: Cache npm dependencies
+              uses: actions/cache@v3
+              id: npm-cache
+              with:
+                path: |
+                  ~/.npm
+                  node_modules
+                key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+                restore-keys: |
+                  ${{ runner.os }}-node-
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                node-version: '18'
+                cache: 'npm'        
+
+            - name: Install dependencies
+              run: |
+                if [ -f "package-lock.json" ]; then
+                  npm ci --no-audit --prefer-offline
+                else
+                  npm install --no-audit --prefer-offline
+                fi
+            
+            - name: SonarQube Scan
+              uses: sonarsource/sonarqube-scan-action@master
+              env:
+                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+                # Chemin vers le rapport de couverture (adaptez selon votre outil de test)
+                SONAR_COVERAGE_REPORT_PATHS: coverage/lcov.info
+                # Exclusion de dossiers inutiles
+                SONAR_EXCLUSIONS: '**/node_modules/**,**/*.test.js,**/*.spec.js'
+                # Inclusion des fichiers sources
+                SONAR_INCLUSIONS: 'src/**/*.js,src/**/*.jsx,src/**/*.ts,src/**/*.tsx'   
+
+            # Étape 8: Vérification de la qualité (optionnelle)
+            - name: Quality Gate Check
+              uses: sonarsource/sonarqube-quality-gate-action@master
+              timeout-minutes: 5
+              env:
+                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  
+            # Étape 9: Upload des artefacts de couverture (optionnel)
+            - name: Upload coverage report
+              uses: actions/upload-artifact@v3
+              if: always()  # S'exécute même en cas d'échec
+              with:
+                name: coverage-report
+                path: coverage/
+                retention-days: 7
+
+
+
+
+
+
+
     Build_and_push:
         runs-on: ubuntu-latest
         needs: Test_Unitaire
@@ -42,21 +111,21 @@ jobs:
 
             - name : docker push 
               run : docker push ${{env.IMAGE_NAME}}:v${{ github.run_number }}   
-    Deployment:
-      runs-on: ubuntu-latest 
-      needs: [Test_Unitaire , Build_and_push]
-      steps:
-        - name: SSH Connect And Deploy
-          uses: appleboy/ssh-action@v1
-          with:
-            host: ${{ secrets.VPS_HOST }}
-            username: ${{ secrets.VPS_USERNAME }}
-            password: ${{ secrets.VPS_PASSWORD }}
-            script: |
-              cd ${{env.DOCKER_COMPOSE_FILE_PATH}}
-              sudo docker compose pull ${{env.SERVICE_NAME_FRONTEND}}
-              sudo docker compose down ${{env.SERVICE_NAME_FRONTEND}}
-              sudo docker compose up -d        
+  #  Deployment:
+  #    runs-on: ubuntu-latest 
+  #    needs: [Test_Unitaire , Build_and_push]
+  #    steps:
+  #      - name: SSH Connect And Deploy
+  #        uses: appleboy/ssh-action@v1
+  #        with:
+  #          host: ${{ secrets.VPS_HOST }}
+  #          username: ${{ secrets.VPS_USERNAME }}
+  #          password: ${{ secrets.VPS_PASSWORD }}
+  #          script: |
+  #            cd ${{env.DOCKER_COMPOSE_FILE_PATH}}
+  #            sudo docker compose pull ${{env.SERVICE_NAME_FRONTEND}}
+  #            sudo docker compose down ${{env.SERVICE_NAME_FRONTEND}}
+  #            sudo docker compose up -d         
 
 
    
