@@ -78,8 +78,8 @@ jobs:
   
             # Étape 9: Upload des artefacts de couverture (optionnel)
             - name: Upload coverage report
-              uses: actions/upload-artifact@v3
-              if: always()  # S'exécute même en cas d'échec
+              uses: actions/upload-artifact@v4
+              if: always()                             
               with:
                 name: coverage-report
                 path: coverage/
