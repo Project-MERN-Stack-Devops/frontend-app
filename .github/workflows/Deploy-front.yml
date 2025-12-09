@@ -81,7 +81,6 @@ jobs:
               if: always()
               run: |
                 echo "⚠️ Note: Quality Gate a échoué mais le pipeline continue."
-                echo "🔍 Vérifiez les problèmes sur: ${{ secrets.SONAR_HOST_URL }}/dashboard?id=Project-MERN-Stack-Devops_frontend-app"
                 echo "📊 Pour améliorer la qualité, corrigez les problèmes listés dans SonarQube."
   
             # Étape 9: Upload des artefacts de couverture (optionnel)
