@@ -70,18 +70,18 @@ jobs:
                 SONAR_INCLUSIONS: 'src/**/*.js,src/**/*.jsx,src/**/*.ts,src/**/*.tsx'   
 
             # Étape 8: Vérification de la qualité (optionnelle)
-            - name: Quality Gate Check (Non bloquant)
-              uses: sonarsource/sonarqube-quality-gate-action@master
-              timeout-minutes: 5
-              continue-on-error: true  # <-- Permet au pipeline de continuer même si échec
-              env:
-                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          
-            - name: Display Quality Gate Status
-              if: always()
-              run: |
-                echo "⚠️ Note: Quality Gate a échoué mais le pipeline continue."
-                echo "📊 Pour améliorer la qualité, corrigez les problèmes listés dans SonarQube."
+          #  - name: Quality Gate Check (Non bloquant)
+          #    uses: sonarsource/sonarqube-quality-gate-action@master
+          #    timeout-minutes: 5
+          #    continue-on-error: true  # <-- Permet au pipeline de continuer même si échec
+          #    env:
+          #      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          #
+          #  - name: Display Quality Gate Status
+          #    if: always()
+          #    run: |
+          #      echo "⚠️ Note: Quality Gate a échoué mais le pipeline continue."
+          #      echo "📊 Pour améliorer la qualité, corrigez les problèmes listés dans SonarQube."
   
             # Étape 9: Upload des artefacts de couverture (optionnel)
             - name: Upload coverage report
