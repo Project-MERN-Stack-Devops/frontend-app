@@ -117,42 +117,66 @@ jobs:
 
 
     snyk-code-security-scan-job:
-        runs-on: ubuntu-latest
-        needs: [Test_Unitaire]
-        permissions:
-          security-events: write
-          contents: read
-        steps:
-          - name: Checkout Code
-            uses: actions/checkout@v4
-     
-          - name: Install Snyk
-            run: npm install -g snyk 
-     
-          - name: Run Snyk Test and Generate SARIF Report
-            # ✅ Assurez-vous d'utiliser --file-output pour que le fichier soit créé
-            run: snyk test --sarif --org=ademze --file-output=snyk-report.sarif
-            env:
-              SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-            # ✅ Laissez continue-on-error: true si vous voulez uploader même avec des vulnérabilités
-            continue-on-error: true 
-     
-          # --- ÉTAPE DE DÉBOGAGE (Facultatif) ---
-          - name: Check for SARIF file
-            run: |
-              if [ ! -f snyk-report.sarif ]; then
-                echo "::error::snyk-report.sarif was NOT created. Check Snyk command output."
-                exit 1
-              fi
-          # ----------------------------------------
+      runs-on: ubuntu-latest
+      needs: [Test_Unitaire]
+      permissions:
+        security-events: write
+        contents: read
+      steps:
+        - name: Checkout Code
+          uses: actions/checkout@v4
+        
+        - name: Install Snyk
+          run: npm install -g snyk 
+        
+        # ========== DÉBOGAGE : STRUCTURE DU PROJET ==========
+        - name: Debug - Vérifier la structure du projet
+          run: |
+            echo "=== Répertoire courant ==="
+            pwd
+            echo "=== Liste des fichiers ==="
+            ls -la
+            echo "=== Recherche des fichiers de dépendances ==="
+            find . -name "package.json" -o -name "package-lock.json" -o -name "yarn.lock" -o -name "*.csproj" -o -name "pom.xml" -o -name "build.gradle" -o -name "requirements.txt" 2>/dev/null | head -20
+            echo "=== Vérification de Node.js/npm ==="
+            node --version || echo "Node.js non installé"
+            npm --version || echo "npm non installé"
+        
+        - name: Run Snyk Test and Generate SARIF Report
+          id: snyk-scan
+          run: |
+            echo "=== Exécution de Snyk test (version standard) ==="
+            # D'abord, exécuter Snyk en mode normal pour voir ce qu'il trouve
+            snyk test --org=ademze --json > snyk-output.json 2>&1 || true
+            
+            echo "=== Contenu du rapport JSON (premières 10 lignes) ==="
+            head -50 snyk-output.json || cat snyk-output.json
+            
+            echo "=== Génération du rapport SARIF ==="
+            # Utiliser l'option correcte : --sarif-file-output
+            snyk test --sarif --org=ademze --sarif-file-output=snyk-report.sarif
+            
+            echo "=== Vérification du fichier généré ==="
+            if [ -f "snyk-report.sarif" ]; then
+              echo "✅ Fichier SARIF créé avec succès"
+              echo "Taille : $(wc -l < snyk-report.sarif) lignes"
+              echo "=== Aperçu du contenu (premières 30 lignes) ==="
+              head -30 snyk-report.sarif
+            else
+              echo "❌ ÉCHEC : Fichier SARIF NON créé"
+              echo "La commande Snyk a peut-être échoué avant de créer le fichier"
+              exit 1
+            fi
+          env:
+            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          continue-on-error: true
+        
+        - name: Upload SARIF Report to GitHub Security
+          if: success() || failure()  # S'exécute même si les étapes précédentes échouent
+          uses: github/codeql-action/upload-sarif@v4
+          with:
+            sarif_file: snyk-report.sarif
     
-          - name: Upload SARIF Report to GitHub Security
-            uses: github/codeql-action/upload-sarif@v4
-            with:
-              # ✅ Le chemin doit correspondre à celui utilisé dans --file-output
-              sarif_file: snyk-report.sarif
-    
-
     Build_and_push:
         runs-on: ubuntu-latest
         needs: [Test_Unitaire, sonarqube-code-quality-scan-job, trivy-image-security-scan-job ,snyk-code-security-scan-job]
