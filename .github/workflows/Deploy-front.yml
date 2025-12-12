@@ -118,20 +118,25 @@ jobs:
 
     snyk-code-security-scan-job:
       runs-on: ubuntu-latest
-      needs : [Test_Unitaire]
+      needs: [Test_Unitaire]
       steps:
-  
         - name: Checkout Code
           uses: actions/checkout@v4
-  
+    
         - name: Install Dependency Scanning Tool (Snyk)
           run: npm install -g snyk
-  
-        - name: Run Snyk Vulnerability Scan
-          run: snyk monitor --all-projects --org=ademze
+    
+        - name: Run Snyk Test and Generate SARIF Report
+          run: snyk test --sarif --org=ademze --file=snyk-report.sarif
           env:
-            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}      
-
+            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          continue-on-error: true  # Le workflow continue même si Snyk trouve des vulnérabilités
+    
+        - name: Upload SARIF Report to GitHub Security
+          uses: github/codeql-action/upload-sarif@v2
+          with:
+            sarif_file: snyk-report.sarif     
+    
 
     Build_and_push:
         runs-on: ubuntu-latest
