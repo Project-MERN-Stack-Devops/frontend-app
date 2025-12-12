@@ -133,7 +133,7 @@ jobs:
           continue-on-error: true  # Le workflow continue même si Snyk trouve des vulnérabilités
     
         - name: Upload SARIF Report to GitHub Security
-          uses: github/codeql-action/upload-sarif@v2
+          uses: github/codeql-action/upload-sarif@v3
           with:
             sarif_file: snyk-report.sarif     
     
