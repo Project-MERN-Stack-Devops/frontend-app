@@ -117,33 +117,41 @@ jobs:
 
 
     snyk-code-security-scan-job:
-     runs-on: ubuntu-latest
-     needs: [Test_Unitaire]
-     # CRITICAL: Add permissions at the JOB level, not just the step
-     permissions:
-       security-events: write
-       contents: read
-     steps:
-       - name: Checkout Code
-         uses: actions/checkout@v4
-  
-       - name: Install Snyk
-         run: npm install -g snyk
-  
-       - name: Run Snyk Test and Generate SARIF Report
-         # FIX: Use --file-output, NOT --file
-         run: snyk test --sarif --org=ademze --file-output=snyk-report.sarif
-         env:
-           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-         # This is why you get exit code 2. The scan runs, finds issues, and "fails".
-         continue-on-error: true
-  
-       - name: Upload SARIF Report to GitHub Security
-         # FIX: Update to v4 and confirm the path
-         uses: github/codeql-action/upload-sarif@v4
-         with:
-           sarif_file: snyk-report.sarif
-       
+        runs-on: ubuntu-latest
+        needs: [Test_Unitaire]
+        permissions:
+          security-events: write
+          contents: read
+        steps:
+          - name: Checkout Code
+            uses: actions/checkout@v4
+     
+          - name: Install Snyk
+            run: npm install -g snyk
+     
+          - name: Run Snyk Test and Generate SARIF Report
+            # ✅ Assurez-vous d'utiliser --file-output pour que le fichier soit créé
+            run: snyk test --sarif --org=ademze --file-output=snyk-report.sarif
+            env:
+              SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+            # ✅ Laissez continue-on-error: true si vous voulez uploader même avec des vulnérabilités
+            continue-on-error: true 
+     
+          # --- ÉTAPE DE DÉBOGAGE (Facultatif) ---
+          - name: Check for SARIF file
+            run: |
+              if [ ! -f snyk-report.sarif ]; then
+                echo "::error::snyk-report.sarif was NOT created. Check Snyk command output."
+                exit 1
+              fi
+          # ----------------------------------------
+    
+          - name: Upload SARIF Report to GitHub Security
+            uses: github/codeql-action/upload-sarif@v4
+            with:
+              # ✅ Le chemin doit correspondre à celui utilisé dans --file-output
+              sarif_file: snyk-report.sarif
+    
 
     Build_and_push:
         runs-on: ubuntu-latest
