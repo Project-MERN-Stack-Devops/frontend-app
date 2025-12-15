@@ -14,6 +14,5 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log* 
 
-#pipline
-.github/workflows/pipeline-ci-cd.yml
-
+#pipline ci/cd ignore
+.github/workflows/Deploy-front.yml
