@@ -16,3 +16,8 @@ yarn-error.log*
 
 #pipline ci/cd ignore
 .github/workflows/Deploy-front.yml
+
+# si je peux supprimer de github et sans le supprimer de mon machine local 
+# git rm --cached .github/workflows/Deploy-front.yml
+# git commit -m "Stop tracking Deploy-front.yml (ignored by gitignore)"
+# git push
